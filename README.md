@@ -22,12 +22,3 @@ With a strong focus on sustainability, Naturolia aims to empower consumers to ma
 - **Backend**: Laravel PHP Framework
 - **Database**: MySQL 
 
-
-
-### Installation:
-To get started with the project locally, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/tanya-batra/Naturolia.git
-
