@@ -101,6 +101,23 @@
             /* Adjust based on header height */
         }
     }
+    #payment-loader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.95);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#payment-loader .spinner-border {
+    width: 4rem;
+    height: 4rem;
+    color: var(--secondary-color);
+}
+
 </style>
 
 <section id="checkout" class="checkout-section py-5">
@@ -159,7 +176,7 @@
                                                value="{{ $address->id }}" id="address{{ $address->id }}"
                                                {{ session('selected_address') == $address->id ? 'checked' : '' }}>
                                         <label class="form-check-label fw-bold" for="address{{ $address->id }}">{{ $address->receiver_name }}</label>
-                                        <p class="mb-0 ms-4 ps-2 small text-muted">{{ $address->address }}, {{ $address->city }}, {{ $address->state }} - {{ $address->pincode }}</p>
+                                        <p class="mb-0 ms-4 ps-2 small text-muted">{{ $address->address }}, {{ $address->city }}, {{ $address->state }} - {{ $address->zipcode }}</p>
                                     </div>
                                 @endforeach
                             @endif
@@ -177,10 +194,10 @@
                         <div class="card-body">
                             @foreach($cartItems as $cartItem)
                                 <div class="d-flex border-bottom pb-3 mb-3">
-                                    <img src="{{ asset($cartItem->product->images->first()->image_path) }}" alt="{{ $cartItem->product->title }}" style="width:60px;height:60px;object-fit:cover;" class="me-3 rounded">
+                                    <img src="{{ asset($cartItem['image']) }}" alt="{{ $cartItem['title'] }}" style="width:60px;height:60px;object-fit:cover;" class="me-3 rounded"> 
                                     <div>
-                                        <p class="mb-0 fw-bold">{{ $cartItem->product->title }}</p>
-                                        <p class="mb-0 small text-muted">Qty: {{ $cartItem->quantity }} | Price: ₹{{ $cartItem->price }}</p>
+                                        <p class="mb-0 fw-bold">{{ $cartItem['title'] }}</p>
+                                        <p class="mb-0 small text-muted">Qty: {{ $cartItem['quantity'] }} | Price: ₹{{ $cartItem['price'] }}</p> 
                                     </div>
                                 </div>
                             @endforeach
@@ -201,9 +218,10 @@
                             </div>
 
                             <div class="border-top pt-3 mt-4">
-                                <button class="btn btn-lg w-100 place-order-btn" type="submit">
-                                    PLACE ORDER (TOTAL: ₹{{ number_format($totalPrice + ($totalPrice * 0.18), 2) }})
+                                <button class="btn btn-lg w-100 place-order-btn" type="button">
+                                    PLACE ORDER (TOTAL: ₹{{ number_format($totalPrice , 2) }})
                                 </button>
+             
                             </div>
                         </div>
                     </div>
@@ -212,25 +230,25 @@
 
             <!-- Right Column: Price Summary -->
             <div class="col-lg-4">
-                <div class="card shadow-sm p-4 summary-sticky">
-                    <h5 class="mb-3 text-dark border-bottom pb-2">PRICE DETAILS</h5>
-                    <div class="d-flex justify-content-between py-2">
-                        <span class="text-muted small">Price ({{ count($cartItems) }} items)</span>
-                        <span class="small">₹{{ number_format($totalPrice, 2) }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between py-2">
-                        <span class="text-muted small">GST (18%)</span>
-                        <span class="small">₹{{ number_format($totalPrice * 0.18, 2) }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between py-2">
-                        <span class="text-muted small">Delivery Charges</span>
-                        <span class="text-success small">FREE</span>
-                    </div>
-                    <div class="d-flex justify-content-between py-3 border-top border-2 mt-2">
-                        <h5 class="fw-bold text-dark mb-0">Total Payable</h5>
-                        <h5 class="fw-bold text-dark mb-0">₹{{ number_format($totalPrice + ($totalPrice * 0.18), 2) }}</h5>
-                    </div>
-                    <p class="text-success fw-bold mt-3 small">You will save ₹0 on this order!</p>
+              <div class="card shadow-sm p-4 summary-sticky">
+    <h5 class="mb-3 text-dark border-bottom pb-2">PRICE DETAILS</h5>
+    <div class="d-flex justify-content-between py-2">
+        <span class="text-muted small">Price ({{ count($cartItems) }} items)</span>
+        <span class="small">₹{{ number_format($totalPrice, 2) }}</span>
+    </div>
+
+    <div class="d-flex justify-content-between py-2">
+        <span class="text-muted small">Delivery / COD Charges</span>
+        <span class="small" id="deliveryCharges">FREE</span>
+    </div>
+
+    <div class="d-flex justify-content-between py-3 border-top border-2 mt-2">
+        <h5 class="fw-bold text-dark mb-0">Total Payable</h5>
+        <h5 class="fw-bold text-dark mb-0" id="totalPayable">₹{{ number_format($totalPrice , 2) }}</h5>
+    </div>
+</div>
+
+                  
                 </div>
             </div>
         </div>
@@ -273,6 +291,158 @@
             </div>
         </div>
     </div>
+<form id="checkout-form" method="POST" action="{{ route('checkout.process') }}">
+    @csrf
+
+    <!-- User selects address -->
+    <input type="hidden" name="shipping_address_id" id="shipping_address_id">
+
+    <!-- Payment method -->
+    <input type="hidden" name="paymentMethod" id="paymentMethod">
+</form>
 
 </section>
+<!-- Fullscreen Loader -->
+<div id="payment-loader" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+">
+    <div class="spinner-border text-success" style="width: 4rem; height: 4rem;" role="status"></div>
+    <p class="mt-3 text-dark fw-bold">Processing your payment... Please wait</p>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.querySelector('.place-order-btn').addEventListener('click', async function (e) {
+    e.preventDefault();
+
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    const selectedAddress = document.querySelector('input[name="shipping_address_id"]:checked');
+
+    if (!selectedAddress) {
+        alert('Please select a shipping address.');
+        return;
+    }
+
+    const shippingAddressId = selectedAddress.value;
+    const form = document.getElementById('checkout-form');
+
+    // 🟢 Cash on Delivery Flow
+    if (paymentMethod === 'cod') {
+        document.getElementById('shipping_address_id').value = shippingAddressId;
+        document.getElementById('paymentMethod').value = paymentMethod;
+
+        form.action = "{{ route('checkout.placeCodOrder') }}";
+        form.submit();
+        return;
+    }
+
+    // 💳 Online Payment Flow
+    try {
+        const res = await fetch("{{ route('checkout.createOrder') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({
+                shipping_address_id: shippingAddressId,
+                payment_method: paymentMethod
+            })
+        });
+
+        const data = await res.json();
+
+        if (!data.orderId) {
+            alert("Failed to create Razorpay order.");
+            return;
+        }
+
+        const options = {
+            key: data.key,
+            amount: data.amount * 100,
+            currency: "INR",
+            name: data.name,
+            description: "Order Payment",
+            order_id: data.orderId,
+           handler: async function (response) {
+    const verify = await fetch("{{ route('checkout.verifyPayment') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            shipping_address_id: shippingAddressId
+        })
+    });
+
+    const verifyData = await verify.json();
+    if (verifyData.success) {
+         document.getElementById('payment-loader').style.display = 'flex';
+        window.location.href = verifyData.redirect_url;
+    } else {
+        alert("Payment verification failed.");
+    }
+}
+,
+            prefill: {
+                name: data.name,
+                email: data.email,
+                contact: data.contact
+            },
+            theme: {
+                color: "#38b000"
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+    } catch (err) {
+        console.error("❌ Razorpay Error:", err);
+        alert("Something went wrong during payment.");
+    }
+});
+
+</script>
+<script>
+const codInput = document.getElementById('cod');
+const onlineInput = document.getElementById('online');
+const deliveryChargesEl = document.getElementById('deliveryCharges');
+const totalPayableEl = document.getElementById('totalPayable');
+const placeOrderBtn = document.querySelector('.place-order-btn');
+
+const baseTotal = {{ $totalPrice }};
+const codCharge = {{ $codCharge }}; 
+
+function updateTotal() {
+    if (codInput.checked) {
+        deliveryChargesEl.textContent = `₹${codCharge} (COD Charges)`;
+        const totalWithCod = baseTotal + codCharge;
+        totalPayableEl.textContent = `₹${totalWithCod.toFixed(2)}`;
+        placeOrderBtn.textContent = `PLACE ORDER (TOTAL: ₹${totalWithCod.toFixed(2)})`;
+    } else {
+        deliveryChargesEl.textContent = "FREE";
+        totalPayableEl.textContent = `₹${baseTotal.toFixed(2)}`;
+        placeOrderBtn.textContent = `PLACE ORDER (TOTAL: ₹${baseTotal.toFixed(2)})`;
+    }
+}
+
+codInput.addEventListener('change', updateTotal);
+onlineInput.addEventListener('change', updateTotal);
+
+updateTotal();
+</script>
+
+
 @endsection

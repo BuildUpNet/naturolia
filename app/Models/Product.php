@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class product extends Model
 {
-    use HasFactory ;
+    use HasFactory;
     protected $fillable = [
         'title',
         'meta_title',
@@ -18,13 +18,19 @@ class product extends Model
         'description',
         'ingredient',
         'price',
-         'mrp_price',
-    'discount',
+        'mrp_price',
+        'qnty',
+        'discount',
         'best_product',
-    ];  
+    ];
     public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+public function topImage()
 {
-    return $this->hasMany(ProductImage::class);
+    return $this->hasOne(ProductImage::class)->where('top_image', 1);
 }
 
 }

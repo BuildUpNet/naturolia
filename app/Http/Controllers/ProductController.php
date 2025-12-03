@@ -108,6 +108,7 @@ class ProductController extends Controller
             'ingredient' => 'nullable|string',
             'price' => 'numeric|min:0',
             'mrp_price' => 'nullable|numeric|min:0',
+              'qnty' => 'nullable|string|max:100',
             'discount' => 'nullable|numeric|min:0|max:100',
             'meta_title' => 'nullable|string|max:255',
             'meta_keywords' => 'nullable|string|max:255',

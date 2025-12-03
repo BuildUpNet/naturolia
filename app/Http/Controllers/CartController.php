@@ -10,41 +10,48 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
+  
     public function viewCart()
-{
-    $user = Auth::user();
-    $cart = Cart::where('user_id', $user->id)->with('items.product.images')->first();
-
-    $items = $cart ? $cart->items : collect();
-
-    return view('add-cart', [
-        'cart' => $cart,
-        'items' => $items
-    ]);
-}
-    // Add product to cart
-    public function addToCart($productId)
     {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'You need to log in first.');
+        if (Auth::check()) {
+            $user = Auth::user();
+
+            $cart = Cart::where('user_id', $user->id)
+                ->with('items.product.images')
+                ->first();
+
+            $items = $cart ? $cart->items : collect();
+        } else {
+        
+            $sessionCart = session('guest_cart', ['items' => []]);
+
+            $items = collect($sessionCart['items'])->map(function ($item) {
+                $product = Product::find($item['product_id']);
+                $item['product'] = $product;
+                $item['id'] = $item['product_id']; 
+                return (object) $item;
+            });
         }
 
-        $user = Auth::user();
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        return view('add-cart', compact('items'));
+    }
 
-        $product = Product::findOrFail($productId);
+public function addToCart($productId)
+{
+    $product = Product::with('images')->findOrFail($productId);
 
-        // Check if product is already in the cart
-        $cartItem = CartItem::where('cart_id', $cart->id)
-                            ->where('product_id', $product->id)
-                            ->first();
+    // If user is logged in
+    if (auth()->check()) {
+        $user = auth()->user();
+        $cart = \App\Models\Cart::firstOrCreate(['user_id' => $user->id]);
+
+        $cartItem = \App\Models\CartItem::where('cart_id', $cart->id)
+            ->where('product_id', $product->id)
+            ->first();
 
         if ($cartItem) {
-            // If already in cart, increment quantity
-            $cartItem->quantity += 1;
-            $cartItem->save();
+            $cartItem->increment('quantity');
         } else {
-            // Add new item to cart
             $cart->items()->create([
                 'product_id' => $product->id,
                 'quantity' => 1,
@@ -55,41 +62,88 @@ class CartController extends Controller
         return redirect()->route('cart.view')->with('success', 'Product added to cart!');
     }
 
-    // Remove item from cart
-    public function removeItem($cartItemId)
-    {
-        $cartItem = CartItem::findOrFail($cartItemId);
-        $cartItem->delete();
+    // For guest users
+    $guestCart = session('guest_cart', ['items' => []]);
+    $items = collect($guestCart['items']);
 
-        return redirect()->route('cart.view')->with('success', 'Item removed from cart');
+    $existing = $items->firstWhere('product_id', $product->id);
+
+    if ($existing) {
+        $items = $items->map(function ($item) use ($product) {
+            if ($item['product_id'] === $product->id) {
+                $item['quantity']++;
+            }
+            return $item;
+        });
+    } else {
+        $items->push([
+            'product_id' => $product->id,
+            'title' => $product->title ?? $product->name ?? 'Unknown Product',
+            'price' => $product->price ?? 0,
+            'quantity' => 1,
+            'image' => $product->images->first()->image_path ?? 'images/default-placeholder.jpg',
+        ]);
     }
 
-    public function updateItemQuantity(Request $request, $cartItemId)
+    session(['guest_cart' => ['items' => $items->toArray()]]);
+
+    return redirect()->route('cart.view')->with('success', 'Product added to cart!');
+}
+
+
+    public function removeItem($cartItemId)
     {
-        $request->validate([
-            'quantity' => 'required|integer|min:1',
-        ]);
+        if (Auth::check()) {
+            $cartItem = CartItem::findOrFail($cartItemId);
+            $cartItem->delete();
+        } else {
+            $cart = session()->get('guest_cart', ['items' => []]);
+            $cart['items'] = array_filter($cart['items'], function ($item) use ($cartItemId) {
+                return $item['product_id'] != $cartItemId;
+            });
+            session()->put('guest_cart', $cart);
+        }
 
-       
-        $cartItem = CartItem::findOrFail($cartItemId);
+        return redirect()->route('cart.view')->with('success', 'Item removed from cart!');
+    }
 
-      
+ 
+ public function updateItemQuantity(Request $request, $cartItemId)
+{
+    $request->validate(['quantity' => 'required|integer|min:1']);
+
+    if (Auth::check()) {
+        // ✅ Logged-in user
+        $cartItem = CartItem::with('cart.items')->findOrFail($cartItemId);
         $cartItem->quantity = $request->quantity;
         $cartItem->save();
 
-        return response()->json([
-            'success' => true,
-            'updated_quantity' => $cartItem->quantity,
-            'updated_subtotal' => number_format($cartItem->price * $cartItem->quantity, 2),
-            'updated_total' => number_format(
-                $cartItem->cart->items->sum(function($item) {
-                    return $item->price * $item->quantity;
-                }) + 
-                $cartItem->cart->items->sum(function($item) {
-                    return ($item->price * $item->quantity) * 0.18; // Tax (GST 18%)
-                }), 
-                2
-            )
-        ]);
+        $subtotal = $cartItem->price * $cartItem->quantity;
+        $total = $cartItem->cart->items->sum(fn($i) => $i->price * $i->quantity);
+    } else {
+        // ✅ Guest user (cart stored in session)
+        $cart = session()->get('guest_cart', ['items' => []]);
+        foreach ($cart['items'] as &$item) {
+            if ($item['product_id'] == $cartItemId) { // using product_id for guest
+                $item['quantity'] = $request->quantity;
+            }
+        }
+
+        session()->put('guest_cart', $cart);
+
+        $subtotal = collect($cart['items'])
+            ->firstWhere('product_id', $cartItemId)['price'] * $request->quantity;
+
+        $total = collect($cart['items'])
+            ->sum(fn($i) => $i['price'] * $i['quantity']);
     }
+
+    return response()->json([
+        'success' => true,
+        'updated_quantity' => $request->quantity,
+        'updated_subtotal' => number_format($subtotal, 2),
+        'updated_total' => number_format($total, 2),
+    ]);
+}
+
 }

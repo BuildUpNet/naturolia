@@ -1,6 +1,7 @@
 @extends('layout.main')
 
 @section('content')
+
 <section id="product-detail" class="py-5" style="min-height: 80vh;">
     <div class="container mt-5">
         <div class="row">
@@ -9,7 +10,7 @@
                     <div class="col-12">
                         <div class="product-image-box p-3 border rounded shadow-sm mb-3">
                             <img src="{{ asset($product->images->first()->image_path ?? 'assets/images/product-placeholder-1.jpg') }}" alt="{{ $product->title }}"
-                                class="img-fluid rounded" id="mainProductImage" style="max-height: 500px; width: 100%; object-fit: contain;">
+                                class="img-fluid rounded" id="mainProductImage" style="height: 500px; width: 100%; object-fit: cover;">
                         </div>
                     </div>
                     <div class="col-12 d-flex product-thumbnails">
@@ -51,7 +52,12 @@
 
     <p class="small text-muted mt-1">Inclusive of all taxes</p>
 </div>
-
+@if(!empty($product->qnty))
+    <p class="fw-semibold text-dark mb-4">
+        <i class="fa-solid fa-box-open me-2 text-secondary"></i>
+        Pack Size: <span class="text-muted">{{ $product->qnty }}</span>
+    </p>
+@endif
 
                     <div class="d-flex align-items-center mb-5">
                         <label for="quantity-input" class="fw-bold me-3">Quantity:</label>
@@ -60,18 +66,14 @@
                             <input type="text" class="form-control text-center" id="quantity-input" value="1" min="1" max="10" readonly>
                             <button class="btn btn-outline-secondary" type="button" id="button-addon-plus">+</button>
                         </div>
-  @auth
-                                        <form action="{{ route('cart.add', ['productId' => $product->id]) }}" method="POST" class="w-50">
+    <form action="{{ route('cart.add', ['productId' => $product->id]) }}" method="POST"
+                                            class="w-50">
                                             @csrf
-                                            <button type="submit" class="btn custom-btn-secondary ms-4 btn-lg">
+                                            <button type="submit" class="btn custom-btn-primary ms-4 w-50">
                                                 <i class="fas fa-shopping-cart me-2"></i>Buy Now
                                             </button>
                                         </form>
-                                    @else
-                                        <button class="btn custom-btn-secondary ms-4 btn-lg" data-bs-toggle="modal" data-bs-target="#loginModal">
-                                            <i class="fas fa-shopping-cart me-2"></i> Buy Now
-                                        </button>
-                                    @endauth
+                                 
                       
                                           
                                       
@@ -92,35 +94,52 @@
                             </div>
                         </div>
 
-                        <div class="accordion-item border mb-3 rounded shadow-sm">
-                            <h2 class="accordion-header" id="headingTwo">
-                                <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    Key Benefits
-                                </button>
-                            </h2>
-                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#productDetailAccordion">
-                                <div class="accordion-body">
-                                    <ul class="list-unstyled mb-0">
-                                        @foreach(explode(',', $product->key_benefits) as $benefit) 
-                                            <li class="mb-2 text-secondary"><i class="fa-solid fa-check-circle text-success me-2"></i>{{ trim($benefit) }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
+                 
+ <div class="accordion-item border mb-3 rounded shadow-sm">
+    <h2 class="accordion-header" id="headingTwo">
+        <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            Key Benefits
+        </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#productDetailAccordion">
+        <div class="accordion-body">
+            <ul class="list-unstyled mb-0">
+                @foreach(explode('•', $product->key_benefits) as $benefit)
+                    @if(trim($benefit)) <!-- Ensure benefit is not empty -->
+                        <li class="mb-2 text-secondary">
+                            <i class="fa-solid fa-check-circle text-success me-2"></i>{{ trim($benefit) }}
+                        </li>
+                    @endif
+                @endforeach
+            </ul>
+        </div>
+    </div>
+</div>
 
-                        <div class="accordion-item border mb-3 rounded shadow-sm">
-                            <h2 class="accordion-header" id="headingThree">
-                                <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    Key Ingredients
-                                </button>
-                            </h2>
-                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#productDetailAccordion">
-                                <div class="accordion-body text-muted small">
-                                    {{ $product->ingredient }}
-                                </div>
-                            </div>
-                        </div>
+<div class="accordion-item border mb-3 rounded shadow-sm">
+    <h2 class="accordion-header" id="headingThree">
+        <button class="accordion-button collapsed fw-bold text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            Key Ingredients
+        </button>
+    </h2>
+    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#productDetailAccordion">
+        <div class="accordion-body text-muted small">
+          <ul class="list-unstyled mb-0">
+               @foreach(preg_split("/[\n,]+/", $product->ingredient) as $ingredient)
+    @if(trim($ingredient) != '')
+        <li class="mb-2">
+            <i class="fa-solid fa-check-circle text-success me-2"></i>{{ trim($ingredient) }}
+        </li>
+    @endif
+@endforeach
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+
                     </div>
                     </div>
             </div>

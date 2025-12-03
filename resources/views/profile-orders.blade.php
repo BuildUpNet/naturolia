@@ -21,6 +21,9 @@
                         <a href="{{ route('account.detail') }}" class="list-group-item list-group-item-action">
                             <i class="fas fa-user-edit me-2"></i> Account Details
                         </a>
+                          <a href="{{ route('account.delete') }}" class="list-group-item list-group-item-action {{ request()->routeIs('account.delete') ? 'active' : '' }}">
+                            <i class="fas fa-trash-alt me-2"></i> Delete Account
+                        </a>
                         <a href="{{ route('logout') }}" class="list-group-item list-group-item-action text-danger"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="fas fa-sign-out-alt me-2"></i> Logout
@@ -99,15 +102,68 @@
                                             @endif
 
                                         
-                                            @if (in_array($order->status, ['shipped', 'courier', 'delivered']))
+                                          
                                                 <a href="{{ route('orders.track', $order->id) }}"
                                                     class="btn btn-sm btn-primary me-2">
                                                     <i class="fas fa-truck me-1"></i> Track Shipment
                                                 </a>
-                                            @endif
+                                        
 
-                                          
-                                          
+                                     @if ($order->status === 'Order Placed')
+                                <form action="{{ route('orders.cancel', $order->id) }}" method="POST" class="d-inline">
+                             @csrf
+                            <button type="submit" class="btn btn-sm btn-danger"
+                              onclick="return confirm('Are you sure you want to cancel this order?')">
+                               <i class="fas fa-times me-1"></i> Cancel Order
+                                 </button>
+                                    </form>
+                                     @endif
+                                        @if ($order->status === 'delivered')
+    @php
+        $deliveredAt = \Carbon\Carbon::parse($order->delivered_at);
+        $daysSinceDelivery = now()->diffInDays($deliveredAt);
+    @endphp
+
+    @if ($daysSinceDelivery <= 5 && $order->return_status == 'none')
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal"
+            data-bs-target="#returnModal{{ $order->id }}">
+            <i class="fas fa-undo me-1"></i> Return Order
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="returnModal{{ $order->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form action="{{ route('orders.return', $order->id) }}" method="POST">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Return Order #{{ $order->order_number }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label for="reason" class="form-label">Reason for Return</label>
+                            <textarea name="return_reason" class="form-control" required rows="3"
+                                placeholder="Explain the reason..."></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-warning">Submit Return Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @elseif($order->return_status == 'requested')
+        <span class="text-warning"><i class="fas fa-clock me-1"></i> Return Requested</span>
+    @elseif($order->return_status == 'accepted')
+        <span class="text-success"><i class="fas fa-check me-1"></i> Return Accepted</span>
+    @elseif($order->return_status == 'rejected')
+        <span class="text-danger"><i class="fas fa-times me-1"></i> Return Rejected</span>
+    @else
+        <span class="text-muted"><i class="fas fa-clock me-1"></i> Return window closed</span>
+    @endif
+@endif
+  
 
                                         </div>
 

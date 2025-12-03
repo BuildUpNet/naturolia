@@ -30,6 +30,8 @@ class User extends Authenticatable
         'status',
         'otp',
         'otp_expires_at',
+        'reactivation_token',
+        'reactivation_expires_at',
 
     ];
 

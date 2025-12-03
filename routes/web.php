@@ -22,6 +22,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ReturnController;
 
 Route::get('/clear-config', function () {
     Artisan::call('config:clear');
@@ -94,20 +95,35 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 
 
 // Cancellation Policy
-Route::get('/policy/cancellation', function () {
+Route::get('/cancellation', function () {
     return view('cancellation');
 })->name('policy.cancellation');
 
 // Returns & Replacements Policy
-Route::get('/policy/returns', function () {
+Route::get('/returns', function () {
     return view('returns');
 })->name('policy.returns');
 
 // Refund Policy
-Route::get('/policy/refunds', function () {
+Route::get('/refunds', function () {
     return view('refunds');
 })->name('policy.refunds');
 
+Route::get('/shipping-policy', function () {
+    return view('shipping');
+})->name('policy.shipping');
+
+Route::get('/privacy-policy', function () {
+    return view('privacy');
+})->name('policy.privacy');
+
+Route::get('/terms-condition', function () {
+    return view('term-condition');
+})->name('policy.terms-condition');
+
+Route::get('/Faq', function () {
+    return view('faq');
+})->name('policy.faq');
 
 //Admin Routes
 Route::middleware(['auth'])->group(function () {
@@ -166,7 +182,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/account/orders', [UserController::class, 'AccountOrder'])->name('account.orders');
     Route::get('/account/address', [UserController::class, 'AccountAddress'])->name('account.address');
     Route::get('/account/detail', [UserController::class, 'AccountDetail'])->name('account.detail');
+      Route::get('/account/delete', [UserController::class, 'showDeleteAccount'])->name('account.delete');
+  Route::patch('/account/deactivate', [UserController::class, 'deactivateAccount'])->name('account.deactivate.submit');
+
+
+    Route::delete('/account/delete', [UserController::class, 'deleteAccount'])->name('account.delete.submit');
 });
+Route::get('/account/reactivate/{token}', [UserController::class, 'showReactivateFormByToken'])->name('account.reactivate.token');
+Route::patch('/account/reactivate/{token}', [UserController::class, 'reactivateAccountByToken'])->name('account.reactivate.token.submit');
+
 Route::post('/account/detail/update', [UserController::class, 'updateUserprofile'])->name('account.update');
 Route::delete('/address/{id}', [UserController::class, 'destroy'])->name('address.destroy');
 Route::get('/address/{id}/edit', [UserController::class, 'addressedit'])->name('address.edit');
@@ -187,30 +211,56 @@ Route::post('/admin/user/update-status', [UserController::class, 'updateStatus']
 Route::resource('admins', AdminController::class)->names([
     'index' => 'admin.admin.index',
 ]);
-
+Route::post('/settings/update-cod-charge', [AdminController::class, 'updateCodCharge'])
+    ->name('admin.updateCodCharge');
+    
+Route::post('/orders/{id}/return', [OrderController::class, 'returnOrder'])
+    ->name('orders.return')
+    ->middleware('auth');
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('orders/pending', [OrderController::class, 'pending'])->name('admin.orders.pending');
     Route::patch('orders/{order}/status', [OrderController::class, 'orderStatus'])->name('admin.orders.status');
     Route::get('orders/completed', [OrderController::class, 'completed'])->name('admin.orders.completed');
 });
 Route::get('/admin/orders/all', [OrderController::class, 'allOrders'])->name('admin.orders.all');
+Route::post('/admin/orders/{id}/refund', [OrderController::class, 'processRefund'])->name('admin.orders.refund');
+Route::get('/admin/orders/cancelled', [OrderController::class, 'cancelledOrders'])->name('admin.orders.cancelled');
 
 Route::get('/orders/track/{order}', [OrderController::class, 'track'])->name('orders.track');
-
+Route::post('/orders/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('orders.cancel');
 Route::post('/admin/orders/{order}/courier-details', [OrderController::class, 'saveCourierDetails'])->name('admin.orders.courier-details');
 
 Route::post('admin/products/toggle-best/{id}', [ProductController::class, 'toggleBestProduct'])->name('admin.products.toggleBest');
-Route::middleware('auth')->group(function () {
+
     Route::get('cart', [CartController::class, 'viewCart'])->name('cart.view');
     Route::post('cart/add/{productId}', [CartController::class, 'addToCart'])->name('cart.add');
     Route::delete('cart/remove/{cartItemId}', [CartController::class, 'removeItem'])->name('cart.remove');
     Route::put('/cart/update/{cartItemId}', [CartController::class, 'updateItemQuantity'])->name('cart.update');
     Route::get('checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-});
 
-Route::middleware('auth')->group(function () {
+
+Route::post('/checkout/guest', [CheckoutController::class, 'guestCheckout'])->name('checkout.guest.place');
+Route::post('/razorpay/verify', [CheckoutController::class, 'razorpayVerify'])->name('razorpay.verify');
+
     Route::get('checkout', [CheckoutController::class, 'showCheckout'])->name('checkout.show');
-    Route::post('checkout', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
+    Route::post('/checkout/process', [CheckoutController::class, 'processCheckout'])->name('checkout.process');
     Route::get('/orders/success/{order}', [CheckoutController::class, 'success'])->name('orders.success');
-});
+
 Route::post('/checkout/add_address', [CheckoutController::class, 'addAddress'])->name('checkout.add_address');
+// Checkout routes
+Route::post('/checkout/create-order', [CheckoutController::class, 'createRazorpayOrder'])->name('checkout.createOrder');
+Route::post('/checkout/verify-payment', [CheckoutController::class, 'verifyPayment'])->name('checkout.verifyPayment');
+
+Route::post('/checkout/place-cod-order', [CheckoutController::class, 'placeCodOrder'])
+    ->name('checkout.placeCodOrder');
+    
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/returns-request', [ReturnController::class, 'index'])->name('admin.returns.request');
+    Route::post('/returns/{id}/accept', [ReturnController::class, 'acceptReturn'])->name('admin.return.accept');
+    Route::post('/returns/{id}/reject', [ReturnController::class, 'rejectReturn'])->name('admin.return.reject');
+    Route::post('/returns/{id}/refund-payment', [ReturnController::class, 'refundPayment'])->name('admin.return.refund');
+});
+Route::get('/invoice/download/{order}', [CheckoutController::class, 'downloadInvoice'])
+    ->name('invoice.download');
+

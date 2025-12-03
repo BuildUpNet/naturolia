@@ -1,4 +1,3 @@
-
 if (typeof AOS !== 'undefined') {
     AOS.init({
         duration: 1000,
@@ -10,6 +9,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const productList = document.getElementById("productList");
     const scrollRightBtn = document.getElementById("scrollRightBtn");
     const scrollLeftBtn = document.getElementById("scrollLeftBtn");
+
+    // 🟩 Fix: Run only if productList exists
+    if (!productList) return;
+
     const cards = productList.querySelectorAll(".product-card-col");
     const totalCards = cards.length;
 
@@ -63,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return window.innerWidth >= 992;
     }
 
-    // Arrow click listeners
+    // 🟩 Fix: Add checks before attaching listeners
     if (scrollRightBtn && scrollLeftBtn) {
         scrollRightBtn.addEventListener("click", () => {
             if (canUseArrows()) slideNext();
@@ -104,17 +107,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Manual scroll - pause auto slide, then resume after delay
     productList.addEventListener("scroll", () => {
-        // Update current index
         const cardWidth = getCardWidth();
         currentIndex = Math.round(productList.scrollLeft / cardWidth);
-        
+
         stopAutoSlideMobile();
 
-        // Clear previous timers if any
         if (manualScrollTimeout) clearTimeout(manualScrollTimeout);
         if (autoResumeTimeout) clearTimeout(autoResumeTimeout);
 
-        // Wait 20 seconds after last scroll event, then wait 10 seconds more before resuming auto slide
         manualScrollTimeout = setTimeout(() => {
             autoResumeTimeout = setTimeout(() => {
                 if (window.innerWidth < 992) {

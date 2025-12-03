@@ -8,7 +8,7 @@
         </div>
     </section>
 
-    <section id="about" class="py-5">
+   <section id="about" class="py-5">
         <div class="container py-5">
             <div class="row align-items-center">
                 <div class="col-lg-6 mb-4 mb-lg-0">
@@ -21,19 +21,13 @@
                     <p class="text-nat-green fw-bold">WHO WE ARE</p>
                     <h2 class="section-title mb-4">🌿 About NATUROLIA</h2>
                     <p class="lead">
-                        NATUROLIA was born with a simple yet powerful vision — to bring people closer to nature’s
-                        healing wisdom. We believe true wellness comes from balance — between body, mind, and spirit —
-                        and that **nature holds the key to restoring it.**
+                       NATUROLIA was born with a simple yet powerful vision — to bring people closer to nature's healing wisdom. We believe true wellness comes from balance — between body, mind, and spirit — and that nature holds the key to restoring it.
                     </p>
                     <p class="text-muted">
-                        At NATUROLIA, we combine the timeless knowledge of **Ayurveda with modern scientific research**
-                        to create safe, effective, and authentic herbal formulations. Each product is thoughtfully
-                        crafted using pure, natural ingredients sourced from trusted cultivators, ensuring potency,
-                        purity, and consistency.
+                      At NATUROLIA, we combine the timeless knowledge of Ayurveda with modern scientific research to create safe, effective, and authentic herbal formulations. Each product is thoughtfully crafted using pure, natural ingredients sourced from trusted cultivators, ensuring potency, purity, and consistency.
                     </p>
                     <p class="text-nat-green fw-bold">
-                        Our mission is to help individuals embrace a healthier lifestyle through natural, holistic, and
-                        sustainable solutions — free from harmful chemicals and side effects.
+                     Our mission is to help individuals embrace a healthier lifestyle through natural, holistic, and sustainable solutions free from harmful chemicals and side effects.
                     </p>
                     <a href="#mission-vision" class="btn btn-outline-success mt-3">Explore Our Values <i
                             class="fas fa-arrow-right ms-2"></i></a>
@@ -70,41 +64,49 @@
         </div>
     </section>
 
-    <section id="why" class="py-5">
+    <section id="why-choose" class="py-5 bg-light">
         <div class="container py-5">
-            <div class="row align-items-center">
-                <div class="col-lg-12 text-center mb-5">
-                    <h2 class="section-title">✨ Why Choose NATUROLIA?</h2>
-                    <p class="lead text-muted">Our Core Principles of Purity and Trust</p>
+            <div class="common-header text-center" data-aos="fade-up">
+                <h2>Why Choose NATUROLIA?</h2>
+                <p class="text-muted">Our Core Principles of Purity and Trust</p>
+            </div>
+            <div class="row mt-5 justify-content-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="col-lg-10 p-4 rounded choose-us-block">
+                    <div class="row text-center text-white">
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <i class="fa-solid fa-seedling fa-3x mb-3"></i>
+                            <p class="small fw-bold">
+                                100% Herbal & Ayurvedic formulations
+                            </p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <i class="fa-solid fa-vial fa-3x mb-3"></i>
+                            <p class="small fw-bold">
+                                Backed by traditional wisdom & modern testing
+                            </p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <i class="fa-solid fa-hand-holding-heart fa-3x mb-3"></i>
+                            <p class="small fw-bold">
+                                Ethically sourced, cruelty-free ingredients
+                            </p>
+                        </div>
+                        <div class="col-md-3 mb-4 mb-md-0">
+                            <i class="fa-solid fa-magnifying-glass-chart fa-3x mb-3"></i>
+                            <p class="small fw-bold">
+                                Commitment to purity, quality, and transparency
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="row justify-content-center">
-                <div class="col-md-3 mb-4 text-center">
-                    <i class="fa-solid fa-seedling fa-3x mb-3"></i>
-                    <p class="fw-bold">100% Herbal & Ayurvedic formulations</p>
-                </div>
-                <div class="col-md-3 mb-4 text-center">
-                    <i class="fa-solid fa-vial fa-3x mb-3"></i>
-                    <p class="fw-bold">Backed by traditional wisdom & modern testing</p>
-                </div>
-                <div class="col-md-3 mb-4 text-center">
-                    <i class="fa-solid fa-hand-holding-heart fa-3x mb-3"></i>
-                    <p class="fw-bold">Ethically sourced, cruelty-free ingredients</p>
-                </div>
-                <div class="col-md-3 mb-4 text-center">
-                    <i class="fa-solid fa-magnifying-glass-chart fa-3x mb-3"></i>
-                    <p class="fw-bold">Commitment to purity, quality, and transparency</p>
-                </div>
-            </div>
-
-            <div class="text-center mt-5">
-                <p class="lead">
-                    Whether it’s improving vitality, balancing hormones, or enhancing overall wellness, **NATUROLIA
-                    stands for trust, care, and the healing power of nature.**
+            <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="300">
+                <p class="lead mt-4">
+                   Whether it's improving vitality, balancing hormones, or enhancing overall wellness, NATUROLIA stands for trust, care, and the healing power of nature.
                 </p>
                 <p class="display-6 fw-bold text-green mt-4">
-                    🌱 NATUROLIA – Inspired by Nature, Perfected by Science.
+                    NATUROLIA — Inspired by Nature, Perfected by Science.
                 </p>
             </div>
         </div>

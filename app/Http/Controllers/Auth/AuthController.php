@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AccountReactivationMail;
 
 class AuthController extends Controller
 {
@@ -43,30 +46,44 @@ public function login(Request $request)
         'password' => 'required',
     ]);
 
-    $credentials = $request->only('email', 'password');
+    // Fetch the user first
+    $user = User::where('email', $request->email)->first();
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
-        $user = Auth::user();
-
-        if ($user->role === 'admin') {
-            return redirect()->route('Admin.Dashboard')
-                ->with('success', 'Welcome back, Admin!');
-        } elseif ($user->role === 'user') {
-            if ($user->status === 'active') {
-                return redirect()->route('home')
-                    ->with('success', 'Login successful! Welcome back.');
-            } else {
-                Auth::logout();
-                return back()->with('error', 'Your account is inactive. Please wait for admin approval.');
-            }
-        } else {
-            Auth::logout();
-            return back()->with('error', 'Invalid user role detected.');
-        }
+    // Check if user exists
+    if (!$user) {
+        return back()->with('error', 'The provided credentials do not match our records.');
     }
 
-    return back()->with('error', 'The provided credentials do not match our records.');
+    // Check if password is correct
+    if (!Hash::check($request->password, $user->password)) {
+        return back()->with('error', 'The provided credentials do not match our records.');
+    }
+
+    // Check if user is active
+    if ($user->status !== 'active') {
+        // Generate reactivation token and expiry
+        $user->reactivation_token = Str::random(60);
+        $user->reactivation_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        // Send reactivation email
+        Mail::to($user->email)->send(new AccountReactivationMail($user));
+
+        return back()->with('error', 'Your account is deactivated. We have sent you an email to reactivate your account. The link is valid for 10 minutes.');
+    }
+
+    // Only active users can log in
+    Auth::login($user);
+    $request->session()->regenerate();
+
+    // Redirect based on role
+    if ($user->role === 'admin') {
+        return redirect()->route('Admin.Dashboard')
+            ->with('success', 'Welcome back, Admin!');
+    }
+
+    return redirect()->route('home')
+        ->with('success', 'Login successful! Welcome back.');
 }
 
 public function logout(Request $request)

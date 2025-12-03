@@ -26,6 +26,8 @@ return new class extends Migration
              $table->string('status')->default('active');
              $table->string('otp')->nullable(); 
             $table->timestamp('otp_expires_at')->nullable();
+             $table->string('reactivation_token')->nullable();
+    $table->timestamp('reactivation_expires_at')->nullable();
             $table->timestamps();
         });
 

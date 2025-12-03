@@ -180,6 +180,13 @@
         <a href="{{ route('admin.orders.completed') }}" class="nav-link py-1">
             <i class="bi bi-check-circle me-2"></i> Completed Orders
         </a>
+          <a href="{{ route('admin.orders.cancelled') }}" class="nav-link py-1">
+            <i class="bi bi-x-circle me-2"></i> Cancelled Orders
+        </a>
+         <a href="{{ route('admin.returns.request') }}" class="nav-link py-1">
+    <i class="bi bi-x-circle me-2"></i> Return Requests
+</a>
+
         <a href="{{ route('admin.orders.all') }}" class="nav-link py-1">
             <i class="bi bi-list me-2"></i> All Orders
         </a>

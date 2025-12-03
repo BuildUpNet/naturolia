@@ -1,90 +1,7 @@
 @extends('layout.main')
 
 @section('content')
-    <!--<div class="container py-5">-->
-    <!--    <div class="row">-->
-    <!--        <div class="col-md-8 mx-auto">-->
-    <!--            <div class="card shadow-sm">-->
-    <!--                <div class="card-header">-->
-    <!--                    <h5 class="mb-0">My Profile</h5>-->
-    <!--                </div>-->
-    <!--                <div class="card-body">-->
-    <!--                    {{-- Display success or error messages --}}-->
-    <!--                    @if(session('success'))-->
-    <!--                        <div class="alert alert-success">{{ session('success') }}</div>-->
-    <!--                    @endif-->
-
-    <!--                    {{-- Profile Info Form --}}-->
-    <!--                    <form action="{{ route('profile.update') }}" method="POST">-->
-    <!--                        @csrf-->
-    <!--                        @method('PUT')-->
-
-    <!--                        <div class="mb-3">-->
-    <!--                            <label for="name" class="form-label">Name</label>-->
-    <!--                            <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}" required>-->
-    <!--                            @error('name')<div class="text-danger">{{ $message }}</div>@enderror-->
-    <!--                        </div>-->
-
-    <!--                        <div class="mb-3">-->
-    <!--                            <label for="email" class="form-label">Email</label>-->
-    <!--                            <input type="email" class="form-control" id="email" name="email" value="{{ old('email', $user->email) }}" required>-->
-    <!--                            @error('email')<div class="text-danger">{{ $message }}</div>@enderror-->
-    <!--                        </div>-->
-
-    <!--                        <div class="mb-3">-->
-    <!--                            <label for="phone" class="form-label">Phone</label>-->
-    <!--                            <input type="text" class="form-control" id="phone" name="phone" value="{{ old('phone', $user->phone) }}">-->
-    <!--                            @error('phone')<div class="text-danger">{{ $message }}</div>@enderror-->
-    <!--                        </div>-->
-
-    <!--                        <h6>Shipping Address</h6>-->
-
-    <!--                        <div class="mb-3">-->
-    <!--                            <label for="address" class="form-label">Address</label>-->
-    <!--                            <input type="text" class="form-control" id="address" name="address" value="{{ old('address', $user->address) }}">-->
-    <!--                            @error('address')<div class="text-danger">{{ $message }}</div>@enderror-->
-    <!--                        </div>-->
-
-    <!--                        <div class="mb-3">-->
-    <!--                            <label for="city" class="form-label">City</label>-->
-    <!--                            <input type="text" class="form-control" id="city" name="city" value="{{ old('city', $user->city) }}">-->
-    <!--                        </div>-->
-
-    <!--                        <div class="mb-3">-->
-    <!--                            <label for="zipcode" class="form-label">Zipcode</label>-->
-    <!--                            <input type="text" class="form-control" id="zipcode" name="zipcode" value="{{ old('zipcode', $user->zipcode) }}">-->
-    <!--                        </div>-->
-
-    <!--                        <button type="submit" class="btn btn-primary">Update Profile</button>-->
-    <!--                    </form>-->
-
-    <!--                    <hr>-->
-
-    <!--                    {{-- Profile Image Change Form --}}-->
-    <!--                    <h5>Change Profile Image</h5>-->
-    <!--                    <form action="{{ route('profile.image') }}" method="POST" enctype="multipart/form-data">-->
-    <!--                        @csrf-->
-
-    <!--                        {{-- Display Current Profile Image --}}-->
-    <!--                        @if($user->profile_image)-->
-    <!--                            <img src="{{ asset('storage/' . $user->profile_image) }}" alt="Profile Image" class="img-thumbnail" width="150">-->
-    <!--                        @else-->
-    <!--                            <img src="{{ asset('storage/default-avatar.png') }}" alt="Profile Image" class="img-thumbnail" width="150">-->
-    <!--                        @endif-->
-                            
-    <!--                        <div class="mb-3 mt-3">-->
-    <!--                            <label for="profile_image" class="form-label">Upload New Profile Image</label>-->
-    <!--                            <input type="file" class="form-control" id="profile_image" name="profile_image" accept="image/*">-->
-    <!--                            @error('profile_image')<div class="text-danger">{{ $message }}</div>@enderror-->
-    <!--                        </div>-->
-
-    <!--                        <button type="submit" class="btn btn-primary">Change Profile Image</button>-->
-    <!--                    </form>-->
-    <!--                </div>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!--</div>-->
+   
     
         <section class="profile-section py-5 bg-light">
         <div class="container">
@@ -116,6 +33,9 @@
     <a href="{{ route('account.detail') }}" class="list-group-item list-group-item-action {{ request()->routeIs('account.detail') ? 'active' : '' }}">
         <i class="fas fa-user-edit me-2"></i> Account Details
     </a>
+     <a href="{{ route('account.delete') }}" class="list-group-item list-group-item-action {{ request()->routeIs('account.delete') ? 'active' : '' }}">
+                            <i class="fas fa-trash-alt me-2"></i> Delete Account
+                        </a>
 
     <a href="{{ route('logout') }}" class="list-group-item list-group-item-action text-danger"
         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

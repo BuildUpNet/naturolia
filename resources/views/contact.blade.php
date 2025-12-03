@@ -20,7 +20,7 @@
                     <div class="info-card h-100">
                         <i class="fa-solid fa-location-dot"></i>
                         <h5>Our Location</h5>
-                        <p class="text-muted">Cabin no 406, 4th floor, San plaza building, Feroze Gandhi market , ludhiana. 141001</p>
+                        <p class="text-muted">406, 4th floor, San plaza building, Feroze Gandhi market , ludhiana. 141001</p>
                     </div>
                 </div>
 
@@ -66,10 +66,17 @@
             <input type="email" name="email" class="form-control" id="formEmail" required>
         </div>
     </div>
-    <div class="mb-3">
+  <div class="row">
+    <div class="col-md-6 mb-3">
+        <label for="formMobile" class="form-label">Mobile Number</label>
+        <input type="text" name="mobile" class="form-control" id="formMobile" placeholder="+91 98765-43210">
+    </div>
+    <div class="col-md-6 mb-3">
         <label for="formSubject" class="form-label">Subject</label>
         <input type="text" name="subject" class="form-control" id="formSubject">
     </div>
+</div>
+
     <div class="mb-3">
         <label for="formMessage" class="form-label">Your Message</label>
         <textarea name="message" class="form-control" id="formMessage" rows="4" required></textarea>

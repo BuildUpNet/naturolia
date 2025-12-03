@@ -23,6 +23,7 @@ return new class extends Migration
             $table->text('ingredient')->nullable();
             $table->decimal('price', 10, 2);
               $table->decimal('mrp_price', 10, 2)->nullable()->after('price');
+                 $table->string('qnty')->nullable();
         $table->decimal('discount', 5, 2)->nullable()->after('mrp_price');
              $table->integer('best_product')->default(0);
             $table->timestamps();

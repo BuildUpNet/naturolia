@@ -21,6 +21,9 @@
                     <a href="{{ route('account.detail') }}" class="list-group-item list-group-item-action {{ request()->routeIs('account.detail') ? 'active' : '' }}">
                         <i class="fas fa-user-edit me-2"></i> Account Details
                     </a>
+                      <a href="{{ route('account.delete') }}" class="list-group-item list-group-item-action {{ request()->routeIs('account.delete') ? 'active' : '' }}">
+                            <i class="fas fa-trash-alt me-2"></i> Delete Account
+                        </a>
                     <a href="{{ route('logout') }}" class="list-group-item list-group-item-action text-danger"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                         <i class="fas fa-sign-out-alt me-2"></i> Logout

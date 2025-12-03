@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Models\CodCharge;
 
 class AdminController extends Controller
 {
@@ -92,6 +93,19 @@ class AdminController extends Controller
 
   
     return redirect()->route('home')->with('success', 'Password updated successfully.');
+}
+public function updateCodCharge(Request $request)
+{
+    $request->validate([
+        'cod_charge' => 'required|numeric|min:0',
+    ]);
+
+    CodCharge::updateOrCreate(
+        ['id' => 1],
+        ['amount' => $request->cod_charge]
+    );
+
+    return back()->with('success', 'COD charge updated successfully!');
 }
 
 }

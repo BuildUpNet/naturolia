@@ -12,7 +12,12 @@
                 <div id="cart-items-container" class="cart-items-list shadow-sm p-3 mb-5 bg-white rounded">
                     @forelse ($items as $item)
              <!-- Cart Item -->
-<div class="cart-item d-flex align-items-center border-bottom py-3" data-product-id="{{ $item->id }}" data-price="{{ $item->price }}">
+<div class="cart-item d-flex align-items-center border-bottom py-3"
+     data-cart-item-id="{{ $item->id }}"
+     data-product-id="{{ $item->product->id }}"
+     data-price="{{ $item->price }}">
+
+
     <div class="item-img me-3">
         <!-- Product Image -->
         @if ($item->product->images->isNotEmpty())
@@ -63,8 +68,6 @@
                 <a href="{{ route('product') }}" class="btn btn-outline-success"><i class="fa-solid fa-arrow-left me-2"></i>Continue Shopping</a>
             </div>
 
-            <!-- Right Side: Cart Summary and Price Details -->
-           <!-- Right Side: Cart Summary and Price Details -->
 <div class="col-lg-4 mt-4 mt-lg-0">
     <div class="cart-summary p-4 shadow-sm bg-light rounded">
         <h4 class="mb-3 text-primary">Price Details</h4>
@@ -84,17 +87,6 @@
                 Shipping
                 <span id="cart-shipping" class="text-success">FREE</span>
             </li>
-
-            <!-- Tax Calculation (GST 18%) -->
-            <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
-                Tax (GST)
-                <span id="cart-tax">
-                    ₹{{ number_format($items->sum(function($item) {
-                        return ($item->price * $item->quantity) * 0.18; // Calculate tax based on price * quantity
-                    }), 2) }}
-                </span>
-            </li>
-
             <!-- Order Total (Subtotal + Tax) -->
             <li class="list-group-item d-flex justify-content-between align-items-center bg-light fw-bold fs-5">
                 Order Total
@@ -102,10 +94,8 @@
                     ₹{{ number_format(
                         $items->sum(function($item) {
                             return $item->price * $item->quantity; // Sum total of price * quantity
-                        }) + 
-                        $items->sum(function($item) {
-                            return ($item->price * $item->quantity) * 0.18; // Add tax
                         }),
+                       
                     2) }}
                 </span>
             </li>
@@ -119,14 +109,7 @@
             </a>
         </div>
 
-        <!-- Savings Information -->
-        <div class="text-center small mt-3">
-            <p class="text-success fw-bold mb-0">You save <span id="cart-savings">
-                ₹{{ number_format($items->sum(function($item) {
-                    return ($item->price * $item->quantity) * 0.1; // Assuming 10% savings
-                }), 2) }}
-            </span> on this order!</p>
-        </div>
+      
     </div>
 </div>
 
@@ -136,63 +119,86 @@
 </section>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        // Handle the increment button click
-        $('.plus-btn').on('click', function() {
-            var quantityInput = $(this).closest('.cart-item').find('.item-quantity');
-            var quantity = parseInt(quantityInput.val());
-            var cartItemId = $(this).closest('.cart-item').data('product-id');
-            
-            // Increment the quantity
-            quantity++;
+$(document).ready(function() {
+   
+    $('.plus-btn').on('click', function() {
+        var quantityInput = $(this).closest('.cart-item').find('.item-quantity');
+        var quantity = parseInt(quantityInput.val());
+       var cartItemId = $(this).closest('.cart-item').data('cart-item-id');
 
+        
+        quantity++;
+        updateCartItemQuantity(cartItemId, quantity, quantityInput);
+    });
+
+   
+    $('.minus-btn').on('click', function() {
+        var quantityInput = $(this).closest('.cart-item').find('.item-quantity');
+        var quantity = parseInt(quantityInput.val());
+       var cartItemId = $(this).closest('.cart-item').data('cart-item-id');
+
+        
+        if (quantity > 1) {
+            quantity--;
             updateCartItemQuantity(cartItemId, quantity, quantityInput);
-        });
-
-        // Handle the decrement button click
-        $('.minus-btn').on('click', function() {
-            var quantityInput = $(this).closest('.cart-item').find('.item-quantity');
-            var quantity = parseInt(quantityInput.val());
-            var cartItemId = $(this).closest('.cart-item').data('product-id');
-            
-            // Decrement the quantity
-            if (quantity > 1) {
-                quantity--;
-                updateCartItemQuantity(cartItemId, quantity, quantityInput);
-            }
-        });
-
-        // Function to update the cart item quantity
-        function updateCartItemQuantity(cartItemId, quantity, quantityInput) {
-            $.ajax({
-                url: '/cart/update/' + cartItemId, // URL to update item quantity
-                method: 'PUT',
-                data: {
-                    quantity: quantity,
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    if (response.success) {
-                        // Update the displayed quantity
-                        quantityInput.val(quantity);
-
-                        // Update the item subtotal
-                        var subtotalElement = $(quantityInput).closest('.cart-item').find('.product-subtotal');
-                        subtotalElement.text( response.updated_subtotal);
-
-                        // Update the cart total
-                        $('#cart-total').text('₹' + response.updated_total);
-                        $('#total-items').text('{{ $items->count() }}');
-                    } else {
-                        alert('Failed to update the cart item quantity.');
-                    }
-                },
-                error: function() {
-                    alert('Something went wrong.');
-                }
-            });
         }
     });
+
+   
+    function updateCartItemQuantity(cartItemId, quantity, quantityInput) {
+        $.ajax({
+            url: '/cart/update/' + cartItemId,
+            method: 'PUT',
+            data: {
+                quantity: quantity,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                  
+                    quantityInput.val(quantity);
+
+                  
+                    var subtotalElement = $(quantityInput).closest('.cart-item').find('.product-subtotal');
+                    subtotalElement.text(response.updated_subtotal);
+
+                
+                    $('#cart-total').text('₹' + response.updated_total);
+                    
+               
+                    recalculateCartTotals();
+                } else {
+                    alert('Failed to update the cart item quantity.');
+                }
+            },
+            error: function() {
+                alert('Something went wrong.');
+            }
+        });
+    }
+
+   
+    function recalculateCartTotals() {
+        let subtotal = 0;
+        let totalItems = 0;
+
+        $('.cart-item').each(function() {
+            const price = parseFloat($(this).data('price'));
+            const qty = parseInt($(this).find('.item-quantity').val());
+            subtotal += price * qty;
+            totalItems += qty;
+        });
+
+        const savings = subtotal * 0.1; 
+        const total = subtotal; 
+  
+        $('#cart-subtotal').text('₹' + subtotal.toFixed(2));
+        $('#cart-total').text('₹' + total.toFixed(2));
+        $('#total-items').text(totalItems);
+        $('#cart-savings').text('₹' + savings.toFixed(2));
+    }
+});
 </script>
+
 
 @endsection

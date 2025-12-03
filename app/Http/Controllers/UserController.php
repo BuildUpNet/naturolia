@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Address;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Order;
+use Carbon\Carbon;
 
 
 class UserController extends Controller
@@ -288,5 +289,77 @@ public function storeAddress(Request $request)
         $user->save();
 
         return response()->json(['status' => 'success', 'message' => 'User status updated successfully']);
+    }
+     public function showDeleteAccount()
+    {
+        $user = Auth::user();
+        return view('inactive-account', compact('user'));
+    }
+      public function deactivateAccount(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'password' => 'required',
+        ]);
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'The password does not match our records.']);
+        }
+
+$user->status = 'inactive';
+$user->save();
+Auth::logout();
+        return redirect('/')->with('success', 'Your account has been temporarily deactivated.');
+    }
+
+    // Permanent Deletion
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'password' => 'required',
+        ]);
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'The password does not match our records.']);
+        }
+
+        Auth::logout();
+        $user->delete();
+
+        return redirect('/')->with('success', 'Your account has been permanently deleted.');
+    }
+ public function showReactivateFormByToken($token)
+    {
+        $user = \App\Models\User::where('reactivation_token', $token)
+            ->where('reactivation_expires_at', '>', now())
+            ->firstOrFail();
+
+        return view('reactivate', compact('user', 'token'));
+    }
+
+    // Handle reactivation via token
+    public function reactivateAccountByToken(Request $request, $token)
+    {
+        $user = \App\Models\User::where('reactivation_token', $token)
+            ->where('reactivation_expires_at', '>', now())
+            ->firstOrFail();
+
+        $request->validate([
+            'password' => 'required',
+        ]);
+
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Incorrect password.']);
+        }
+
+        $user->status = 'active';
+        $user->reactivation_token = null;
+        $user->reactivation_expires_at = null;
+        $user->save();
+
+        return redirect()->route('home')->with('success', 'Your account has been reactivated. Please log in.');
     }
 }

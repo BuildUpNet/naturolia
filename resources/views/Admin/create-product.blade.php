@@ -70,8 +70,12 @@
                 <label class="form-label">MRP Price (₹)</label>
                 <input type="number" name="mrp_price" value="{{ old('mrp_price', $product->mrp_price) }}" class="form-control" step="0.01">
             </div>
-
-            <div class="col-md-12">
+ <div class="col-md-6">
+                <label class="form-label">Quantity</label>
+                <input type="text" name="qnty" value="{{ old('qnty', $product->qnty) }}" class="form-control" placeholder="e.g., 500ml, 1kg, 30 tablets">
+                <small class="text-muted">Specify unit type like 500ml, 1kg, 30 capsules etc.</small>
+            </div>
+            <div class="col-md-6">
                 <label class="form-label">Discount (%)</label>
                 <input type="number" name="discount" value="{{ old('discount', $product->discount) }}" class="form-control" step="0.01" min="0" max="100">
                 <small class="text-muted">Enter discount percentage (e.g., 10 for 10%)</small>

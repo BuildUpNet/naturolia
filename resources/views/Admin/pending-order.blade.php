@@ -112,7 +112,7 @@
                                                     <label for="courier_link_{{ $order->id }}"
                                                         class="form-label">Courier Link</label>
                                                    <input type="text" name="courier_link" id="courier_link_{{ $order->id }}" class="form-control"
-       placeholder="https://tracking-url.com/your-tracking-code" required
+       placeholder="https://tracking-url.com/your-tracking-code"
        pattern="^(https?:\/\/|www\.)[^\s]+$"
        title="Enter a valid URL starting with http://, https://, or www.">
 
@@ -138,6 +138,7 @@
                                                         <th>Product Name</th>
                                                         <th>Product Image</th>
                                                         <th>Quantity</th>
+                                                        <th>Mobile NO</th>
                                                         <th>User City</th>
                                                         <th>Shipping Address</th>
                                                         <th>Zip Code</th>
@@ -152,7 +153,9 @@
                                                                     alt="Product Image" width="50" height="50"
                                                                     class="rounded">
                                                             </td>
+                                                           
                                                             <td>{{ $item->quantity }}</td>
+                                                             <td>{{ $order ->user->phone ?? 'N/A' }}</td>
                                                             <td>{{ $order->user->city ?? 'N/A' }}</td>
                                                             <td>{{ $order->shipping_address }}</td>
                                                             <td>{{ $order->user->zipcode ?? 'N/A' }}</td>
