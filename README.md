@@ -1,7 +1,6 @@
 <p align="center">
   <a href="https://naturolia.in" target="_blank">
-  <img src="{{ asset('assets/logo.png') }}" width="400" alt="Naturolia">
-
+    <img src="public/assets/images/logo.png" width="400" alt="Naturolia">
   </a>
 </p>
 
